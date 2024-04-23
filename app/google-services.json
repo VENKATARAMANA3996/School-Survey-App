@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "788957059715",
-    "project_id": "school-survey-app-ab57f",
-    "storage_bucket": "school-survey-app-ab57f.appspot.com"
+    "project_number": "866232847367",
+    "project_id": "school-surver-app",
+    "storage_bucket": "school-surver-app.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:788957059715:android:984b5c87700e4963e759b6",
+        "mobilesdk_app_id": "1:866232847367:android:5c19d9a74101f720c7eea2",
         "android_client_info": {
           "package_name": "com.schoolsurvey"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyCJGFwVyBx1j00SxzrCN7_PHRpR9RFIODI"
+          "current_key": "AIzaSyCodrA8odf9wFJZBOEQ6LwAAeZrOxLH-og"
         }
       ],
       "services": {

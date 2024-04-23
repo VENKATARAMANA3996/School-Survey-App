@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,25 +12,37 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.schoolsurvey.R
 import com.schoolsurvey.routing.Screen
+import com.schoolsurvey.ui.drawer.DrawerBody
+import com.schoolsurvey.ui.drawer.DrawerHeader
+import com.schoolsurvey.ui.drawer.TopBar
 import com.schoolsurvey.ui.model.SurveyModel
+import com.schoolsurvey.ui.school_preference.SchoolPreference
 import com.schoolsurvey.ui.theme.SchoolSurveyAppTheme
 import com.schoolsurvey.ui.theme.green
 import com.schoolsurvey.ui.theme.white
 import com.schoolsurvey.utils.RoundedButton
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalComposeUiApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnrememberedMutableState")
 @Composable
 fun MainScreen(navController: NavController) {
     val context = LocalContext.current
-    val checked = remember { mutableStateOf(false) }
+    val preference = remember {
+        SchoolPreference(context)
+    }
     val scrollState = rememberScrollState()
+    val scaffoldState = rememberScaffoldState()
+    val scope = rememberCoroutineScope()
+    var isLogout by remember { mutableStateOf(false) }
     val list = arrayListOf<SurveyModel>().apply {
         add(SurveyModel(question = "Is the information in school newsletters useful and relevant?"))
         add(SurveyModel(question = "Do you find the school’s online portal user-friendly?"))
@@ -47,33 +60,56 @@ fun MainScreen(navController: NavController) {
 
 
     SchoolSurveyAppTheme {
-        Scaffold {
+        androidx.compose.material.Scaffold(
+            scaffoldState = scaffoldState,
+            topBar = {
+                TopBar(
+                    navController = navController,
+                    onNavigationIconClick = {
+                        scope.launch {
+                            scaffoldState.drawerState.open()
+                        }
+                    }
+                )
+            },
+            modifier = Modifier.background(color = green),
+            drawerContent = {
+                DrawerHeader()
+                DrawerBody(onFeedback = {
+                    navController.navigate(Screen.FeedbackScreen.route)
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                },onLogout = {
+                    isLogout = true
+                    scope.launch {
+                        scaffoldState.drawerState.close()
+                    }
+                })
+            },
+            backgroundColor = green,
+            contentColor = green,
+            drawerBackgroundColor = green
+        ) { paddingValues ->
+            Modifier.padding(
+                bottom = paddingValues.calculateBottomPadding()
+            )
             Column(
                 modifier = Modifier
                     .background(color = green)
                     .padding(top = 40.dp)
                     .verticalScroll(scrollState)
             ) {
-                SmallTopAppBar(
-                    title = {
-                        Text(
-                            text = "Quiz", color = Color.White,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(10.dp),
-                            style = TextStyle(fontWeight = FontWeight.SemiBold, fontSize = 18.sp)
-                        )
-                    },
-
-                    colors = TopAppBarDefaults.smallTopAppBarColors(
-                        containerColor = green,
-                        titleContentColor = Color.White
-                    )
+                Text(
+                    "Participants : 20",
+                    fontSize = 14.sp,
+                    color = white,
+                    modifier = Modifier
+                        .padding(vertical = 5.dp, horizontal = 10.dp)
                 )
                 Spacer(Modifier.height(10.dp))
-
                 Column {
-                    list.forEachIndexed { parentIndex, quizModel ->
+                    list.forEachIndexed { parentIndex, model ->
                         Card(
                             modifier = Modifier
                                 .padding(bottom = 10.dp, start = 10.dp, end = 10.dp)
@@ -85,7 +121,7 @@ fun MainScreen(navController: NavController) {
                         ) {
                             Spacer(Modifier.height(10.dp))
                             Text(
-                                quizModel.question ?: "",
+                                model.question ?: "",
                                 fontSize = 14.sp,
                                 color = Color.Black,
                                 modifier = Modifier
@@ -129,6 +165,41 @@ fun MainScreen(navController: NavController) {
                 Spacer(Modifier.height(10.dp))
             }
 
+        }
+        if (isLogout) {
+            AlertDialog(
+                onDismissRequest = {
+                    isLogout = false
+                },
+                title = { Text(stringResource(id = R.string.app_name)) },
+                text = { Text("Are you sure you want to logout ?") },
+                confirmButton = {
+                    RoundedButton(
+                        text = "Cancel",
+                        textColor = white,
+                        onClick = { isLogout = false }
+                    )
+                },
+                dismissButton = {
+
+                    RoundedButton(
+                        text = "Logout",
+                        textColor = white,
+                        onClick = {
+                            preference.saveData("isLogin", false)
+                            navController.navigate(
+                                Screen.LoginScreen.route
+                            ) {
+                                popUpTo(Screen.MainScreen.route) {
+                                    inclusive = true
+                                }
+                            }
+                            isLogout = false
+                        }
+                    )
+
+                }
+            )
         }
 
 
