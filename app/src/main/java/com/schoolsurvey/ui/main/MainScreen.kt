@@ -110,11 +110,14 @@ fun MainScreen(navController: NavController) {
                 Spacer(Modifier.height(10.dp))
                 Column {
                     list.forEachIndexed { parentIndex, model ->
+                        var selectedOption by remember {
+                            mutableStateOf("")
+                        }
                         Card(
                             modifier = Modifier
                                 .padding(bottom = 10.dp, start = 10.dp, end = 10.dp)
                                 .fillMaxWidth()
-                                .height(220.dp),
+                                .height(if(selectedOption == "") 220.dp else 140.dp),
                             shape = RoundedCornerShape(10.dp),
                             colors = CardDefaults.cardColors(containerColor = Color.White),
                             elevation = CardDefaults.cardElevation(defaultElevation = 5.dp)
@@ -134,9 +137,7 @@ fun MainScreen(navController: NavController) {
                                 modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(Modifier.height(10.dp))
-                            var selectedOption by remember {
-                                mutableStateOf("")
-                            }
+
                             if(selectedOption=="") {
                                 Column {
                                     RoundedButton(

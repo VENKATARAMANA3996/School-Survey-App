@@ -54,6 +54,7 @@ fun RegisterScreen(navController: NavController) {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     val db = Firebase.firestore
+    var done by remember { mutableStateOf(false) }
     SchoolSurveyAppTheme {
         Scaffold {
             Column(
@@ -155,11 +156,12 @@ fun RegisterScreen(navController: NavController) {
                                     onClick = {
                                         if (name.isNotEmpty()) {
                                             if (email.isNotEmpty()) {
-                                                if (!isValidEmail(email.trim())) {
+                                                if (!isValidEmail(email)) {
                                                     if (password.isNotEmpty()) {
+                                                        done = true
                                                         val user = hashMapOf(
                                                             "name" to name,
-                                                            "email" to email,
+                                                            "email" to email.lowercase(),
                                                             "password" to password
                                                         )
                                                         db.collection("users")
@@ -175,7 +177,7 @@ fun RegisterScreen(navController: NavController) {
                                                                             )
                                                                             Toast.makeText(
                                                                                 context,
-                                                                                "Register successfully.",
+                                                                                "User Register successfully.",
                                                                                 Toast.LENGTH_SHORT
                                                                             ).show()
                                                                             navController.navigate(
@@ -185,24 +187,28 @@ fun RegisterScreen(navController: NavController) {
                                                                                     inclusive = true
                                                                                 }
                                                                             }
+                                                                            done = false
                                                                         }
                                                                         .addOnFailureListener { e ->
+
                                                                             Toast.makeText(
                                                                                 context,
                                                                                 e.message.toString(),
                                                                                 Toast.LENGTH_SHORT
                                                                             ).show()
+                                                                            done = false
                                                                         }
                                                                 } else {
                                                                     for (document in result) {
-                                                                        if (document.data["email"] == email &&
+                                                                        if (document.data["email"] == email.lowercase() &&
                                                                             document.data["password"] == password
                                                                         ) {
                                                                             Toast.makeText(
                                                                                 context,
-                                                                                "Already exists.",
+                                                                                "User Already exists.",
                                                                                 Toast.LENGTH_SHORT
                                                                             ).show()
+                                                                            done = false
                                                                             return@addOnSuccessListener
                                                                         } else {
                                                                             db.collection("users")
@@ -214,19 +220,17 @@ fun RegisterScreen(navController: NavController) {
                                                                                     )
                                                                                     Toast.makeText(
                                                                                         context,
-                                                                                        "Register successfully.",
+                                                                                        "User Register successfully.",
                                                                                         Toast.LENGTH_SHORT
                                                                                     ).show()
                                                                                     navController.navigate(
                                                                                         Screen.MainScreen.route
                                                                                     ) {
-                                                                                        popUpTo(
-                                                                                            Screen.RegisterScreen.route
-                                                                                        ) {
-                                                                                            inclusive =
-                                                                                                true
+                                                                                        popUpTo(Screen.RegisterScreen.route) {
+                                                                                            inclusive = true
                                                                                         }
                                                                                     }
+                                                                                    done = false
                                                                                 }
                                                                                 .addOnFailureListener { e ->
                                                                                     Toast.makeText(
@@ -234,6 +238,7 @@ fun RegisterScreen(navController: NavController) {
                                                                                         e.message.toString(),
                                                                                         Toast.LENGTH_SHORT
                                                                                     ).show()
+                                                                                    done = false
                                                                                 }
                                                                         }
                                                                     }
@@ -245,6 +250,7 @@ fun RegisterScreen(navController: NavController) {
                                                                     exception.message.toString(),
                                                                     Toast.LENGTH_SHORT
                                                                 ).show()
+                                                                done = false
                                                             }
                                                     } else {
                                                         Toast.makeText(
@@ -324,7 +330,21 @@ fun RegisterScreen(navController: NavController) {
                 }
                 Spacer(modifier = Modifier.height(10.dp))
             }
-
+            if (done) {
+                Dialog(
+                    onDismissRequest = { },
+                    DialogProperties(dismissOnBackPress = false, dismissOnClickOutside = false)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .background(white, shape = RoundedCornerShape(8.dp))
+                    ) {
+                        CircularProgressIndicator(color = green)
+                    }
+                }
+            }
 
         }
     }
