@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:866232847367:android:5c19d9a74101f720c7eea2",
+        "mobilesdk_app_id": "1:866232847367:android:90664a1fdbd56f6ec7eea2",
         "android_client_info": {
-          "package_name": "com.schoolsurvey"
+          "package_name": "uk.ac.tees.mad.D3574333"
         }
       },
       "oauth_client": [],
